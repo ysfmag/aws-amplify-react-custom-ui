@@ -30,7 +30,7 @@ amplifyCustomUi.setSignIn(<SignIn />);
 
 class Hello extends Component {
   render() {
-    return <div> hello wordl </div>;
+    return <div> hello world </div>;
   }
 }
 export default class App extends Component {
