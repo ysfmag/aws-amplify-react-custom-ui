@@ -1,0 +1,8 @@
+{
+  "short_name": "aws-amplify-react-custom-ui",
+  "name": "aws-amplify-react-custom-ui",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
