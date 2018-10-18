@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-
 import styles from "./styles.css";
-
 import _ from "lodash";
 import { BehaviorSubject } from "rxjs";
-let authenticationState = new BehaviorSubject("signUp");
+let authenticationState = new BehaviorSubject(null);
 const HocAuthComponent = (() => {
   return class extends Component {
     render() {
@@ -95,23 +93,6 @@ const configCustomUi = [
   }
 ];
 
-const ConfirmSignUpPage = props => {
-  const { authState } = props;
-  console.log("hide", authState, authState.includes("confirmSignUp"), props);
-  if (authState && authState.includes("confirmSignUp")) {
-    return (
-      <div>
-        <PresentationHeader />
-        <div style={styles.continer}>
-          <h1> Confirmez votre email</h1>
-          <ConfirmSignUp history={props.history} />
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
 const setSignIn = comp => {
   configCustomUi[1].component = comp;
 };
@@ -122,30 +103,36 @@ const generateCustomUi = () => {
       <HocAuthComponent content={Item.component} type={Item.type} />
     );
   });
-  console.log(costumUi);
 };
 
 const costumise = (type, component) => {};
 
 const updateAuthState = state => {
-  authenticationState = state;
+  authenticationState.next(state);
 };
 const Authenticator = comp => {
   generateCustomUi();
 
-  const SecureComponent = withAuthenticator(comp, null, costumUi);
-
   return class extends Component {
     state = {
-      authState: "signUp"
+      authState: null
     };
+    authenticationSubscription = null;
     componentDidMount() {
-      authenticationState.subscribe(st => {
-        console.log("state", st);
-      });
+      this.authenticationSubscription = authenticationState.subscribe(
+        authState => {
+          this.setState({ authState });
+        }
+      );
+    }
+    componentWillUnmount() {
+      if (this.authenticationSubscription) {
+        this.authenticationSubscription.unsubscribe();
+      }
     }
     render() {
       const { authState } = this.state;
+      const SecureComponent = withAuthenticator(comp, null, costumUi);
       return <SecureComponent authState={authState} />;
     }
   };
