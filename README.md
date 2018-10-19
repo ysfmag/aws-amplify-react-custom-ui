@@ -10,9 +10,12 @@
 npm install --save aws-amplify-react-custom-ui
 ```
 
+
 ## Usage
 
 This lib help you create a custom ui for amplify-react 
+
+:warning: Please don't use in production , it's under development
 
 ### App.js 
 
