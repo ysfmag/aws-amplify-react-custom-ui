@@ -21,11 +21,12 @@ Somewhere in your app, preferably at the root level, configure AmplifyCustomUi .
 ```js
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
-import App from "./App";
+
 // amplify config
 import Amplify from "aws-amplify";
 import awsconfig from "./aws-exports";
+
+// amplify-Custom-ui config
 import * as aws_amplify_react from "aws-amplify-react";
 import AmplifyCustomUi from "aws-amplify-react-custom-ui";
 
