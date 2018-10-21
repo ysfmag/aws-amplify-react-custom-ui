@@ -208,9 +208,7 @@ const Authenticator = comp => {
         this.authenticationSubscription.unsubscribe();
       }
     }
-    authStateChange = (s, d) => {
-      console.log("authStateChansssge", s, d);
-    };
+    authStateChange = (state, data) => {};
     render() {
       const { authState } = this.state;
       const SecureComponent = withAuthenticator(
@@ -254,14 +252,12 @@ const setForgotPassword = component => {
 };
 
 const setTOTPSetup = component => {
-  setComponent("forgotPassword", component);
+  setComponent("TOTPSetup", component);
 };
 
 export default {
   withAuthenticator: Authenticator,
-  generateCustomUi,
   configure,
-  updateAuthState,
   //Component Setter
   setSignIn,
   setTOTPSetup,
