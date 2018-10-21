@@ -67,7 +67,7 @@ AmplifyCustomUi.setSignIn(SignIn);
 
 > setTOTPSetup(component) .
 
-the lib provide tow function authError , changeAuthState as props to the component , you need to use these function to notify that the authstate had been changed , [example](#example-for-:-SignIn.js) .
+the lib provide tow function authError , changeAuthState as props to the component , you need to use these function to notify that the authentication state had been changed , [example](#example-for-:-SignIn.js) .
 
 ### App.js
 
