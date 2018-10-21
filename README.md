@@ -1,6 +1,6 @@
 # aws-amplify-react-custom-ui
 
-> 
+>
 
 [![NPM](https://img.shields.io/npm/v/aws-amplify-react-custom-ui.svg)](https://www.npmjs.com/package/aws-amplify-react-custom-ui) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -10,44 +10,94 @@
 npm install --save aws-amplify-react-custom-ui
 ```
 
-
 ## Usage
 
-This lib help you create a custom ui for amplify-react 
+This lib help you override existing ui for amplify-react
 
-:warning: Please don't use in production , it's under development
+## Configuration
 
-### App.js 
+Somewhere in your app, preferably at the root level, configure AmplifyCustomUi .
+
+```js
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+// amplify config
+import Amplify from "aws-amplify";
+import awsconfig from "./aws-exports";
+import * as aws_amplify_react from "aws-amplify-react";
+import AmplifyCustomUi from "aws-amplify-react-custom-ui";
+
+Amplify.configure(awsconfig);
+AmplifyCustomUi.configure(aws_amplify_react);
+
+ReactDOM.render(<App />, document.getElementById("root"));
+```
+
+## Example
+
+You can provide custom SignIn component by using , setSignIn:
+
+```jsx
+import SignIn from "./SignIn";
+import AmplifyCustomUi from "aws-amplify-react-custom-ui";
+AmplifyCustomUi.setSignIn(SignIn);
+```
+
+**params**
+
+> withAuthenticator() : component renders your App component after a successful user signed in, and it prevents non-sign-in uses to interact with your app. In this case, we need to display a sign-out button to trigger the related process.
+
+> configure(configuration) : configure the lib "aws-amplify-react-custom-ui" .
+
+> setSignIn(component) : to override the signIn page .
+
+> setForgotPassword(component) : to override the ForgotPassword page .
+
+> setConfirmSignUp(component) .
+
+> setVerifyContact(component) .
+
+> setSignUp(component) .
+
+> setRequireNewPassword(component) .
+
+> setConfirmSignIn(component) .
+
+> setTOTPSetup(component) .
+
+the lib provide tow function authError , changeAuthState as props to the component , you need to use these function to notify that the authstate had been changed , [example](#example-for-:-SignIn.js) .
+
+### App.js
 
 ```jsx
 import React, { Component } from "react";
 
-import Amplify from "aws-amplify";
 import SignIn from "./SignIn";
-import AWS_CONFIG from "./aws-exports";
-import * as aws_amplify_react from "aws-amplify-react";
-import * as amplifyCustomUi from "aws-amplify-react-custom-ui";
-Amplify.configure(AWS_CONFIG);
-amplifyCustomUi.configure(aws_amplify_react);
-amplifyCustomUi.setSignIn(<SignIn />);
+import amplifyCustomUi from "aws-amplify-react-custom-ui";
 
-class Hello extends Component {
+class HelloWorld extends Component {
   render() {
     return <div> hello world </div>;
   }
 }
 export default class App extends Component {
+  componentWillMount() {
+    amplifyCustomUi.setSignIn(SignIn);
+  }
+
   render() {
-    const SecureComponent = amplifyCustomUi.Authenticator(Hello);
-    return <SecureComponent />;
+    const SecureHelloWrold = amplifyCustomUi.withAuthenticator(HelloWorld);
+    return <SecureHelloWrold />;
   }
 }
 ```
 
-### SignIn.js 
+### Example for : SignIn.js
 
 ```jsx
- import React, { Component } from "react";
+import React, { Component } from "react";
 import { Auth } from "aws-amplify";
 const styles = {
   continer: {
@@ -87,25 +137,47 @@ const INITIAL_STATE = {
   error: null
 };
 
-class SignInForm extends Component {
+class SignIn extends Component {
   constructor(props) {
     super(props);
 
     this.state = { ...INITIAL_STATE };
   }
 
+  changeState(type, event) {
+    const { changeAuthState } = this.props;
+    changeAuthState(type, event);
+  }
+
   onSubmit = event => {
     const { email, password } = this.state;
 
     Auth.signIn(email, password)
-      .then(data => {
+      .then(user => {
         this.setState(() => ({ ...INITIAL_STATE }));
-        window.location.reload();
-        console.log(" signIn data", data);
+        if (
+          user.challengeName === "SMS_MFA" ||
+          user.challengeName === "SOFTWARE_TOKEN_MFA"
+        ) {
+          this.changeState("confirmSignIn", user);
+        } else if (user.challengeName === "NEW_PASSWORD_REQUIRED") {
+          this.changeState("requireNewPassword", user);
+        } else if (user.challengeName === "MFA_SETUP") {
+          this.changeState("TOTPSetup", user);
+        } else {
+          this.changeState("signedIn", user);
+        }
       })
-      .catch(error => {
-        console.log("signIn error", error);
-        this.setState(updateByPropertyName("error", error));
+      .catch(err => {
+        const { authError } = this.props;
+        if (err.code === "UserNotConfirmedException") {
+          this.changeState("confirmSignUp");
+        } else if (err.code === "PasswordResetRequiredException") {
+          this.changeState("requireNewPassword");
+        } else {
+          authError(err);
+        }
+        this.setState(updateByPropertyName("error", err));
       });
 
     event.preventDefault();
@@ -117,54 +189,54 @@ class SignInForm extends Component {
     const isInvalid = password === "" || email === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          style={styles.input}
-          value={email}
-          onChange={event =>
-            this.setState(updateByPropertyName("email", event.target.value))
-          }
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          style={styles.input}
-          value={password}
-          onChange={event =>
-            this.setState(updateByPropertyName("password", event.target.value))
-          }
-          type="password"
-          placeholder="Password"
-        />
-        <button style={styles.submit} disabled={isInvalid} type="submit">
-          Sign In
-        </button>
-
-        {error && <p>{error.message}</p>}
-      </form>
-    );
-  }
-}
-
-class SignInPage extends Component {
-  render() {
-    return (
       <div>
         <div style={styles.continer}>
           <h1>SignIn</h1>
-          <SignInForm />
+          <form onSubmit={this.onSubmit}>
+            <input
+              style={styles.input}
+              value={email}
+              onChange={event =>
+                this.setState(updateByPropertyName("email", event.target.value))
+              }
+              type="text"
+              placeholder="Email Address"
+            />
+            <input
+              style={styles.input}
+              value={password}
+              onChange={event =>
+                this.setState(
+                  updateByPropertyName("password", event.target.value)
+                )
+              }
+              type="password"
+              placeholder="Password"
+            />
+            <button style={styles.submit} disabled={isInvalid} type="submit">
+              Sign In
+            </button>
+
+            {error && <p>{error.message}</p>}
+          </form>
+          <div>
+            <p> No account? </p>
+            <button
+              style={styles.submit}
+              onClick={() => this.changeState("signUp")}
+            >
+              Create account
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 }
 
-export default SignInPage;
-
+export default SignIn;
 ```
-
-
 
 ## License
 
-MIT © [youssef maghzaz](https://github.com/youssef maghzaz)
+MIT © [youssef maghzaz](https://github.com/ysfmag)

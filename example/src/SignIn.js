@@ -38,25 +38,47 @@ const INITIAL_STATE = {
   error: null
 };
 
-class SignInForm extends Component {
+class SignIn extends Component {
   constructor(props) {
     super(props);
 
     this.state = { ...INITIAL_STATE };
   }
 
+  changeState(type, event) {
+    const { changeAuthState } = this.props;
+    changeAuthState(type, event);
+  }
+
   onSubmit = event => {
     const { email, password } = this.state;
 
     Auth.signIn(email, password)
-      .then(data => {
+      .then(user => {
         this.setState(() => ({ ...INITIAL_STATE }));
-        window.location.reload();
-        console.log(" signIn data", data);
+        if (
+          user.challengeName === "SMS_MFA" ||
+          user.challengeName === "SOFTWARE_TOKEN_MFA"
+        ) {
+          this.changeState("confirmSignIn", user);
+        } else if (user.challengeName === "NEW_PASSWORD_REQUIRED") {
+          this.changeState("requireNewPassword", user);
+        } else if (user.challengeName === "MFA_SETUP") {
+          this.changeState("TOTPSetup", user);
+        } else {
+          this.changeState("signedIn", user);
+        }
       })
-      .catch(error => {
-        console.log("signIn error", error);
-        this.setState(updateByPropertyName("error", error));
+      .catch(err => {
+        const { authError } = this.props;
+        if (err.code === "UserNotConfirmedException") {
+          this.changeState("confirmSignUp");
+        } else if (err.code === "PasswordResetRequiredException") {
+          this.changeState("requireNewPassword");
+        } else {
+          authError(err);
+        }
+        this.setState(updateByPropertyName("error", err));
       });
 
     event.preventDefault();
@@ -68,46 +90,49 @@ class SignInForm extends Component {
     const isInvalid = password === "" || email === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          style={styles.input}
-          value={email}
-          onChange={event =>
-            this.setState(updateByPropertyName("email", event.target.value))
-          }
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          style={styles.input}
-          value={password}
-          onChange={event =>
-            this.setState(updateByPropertyName("password", event.target.value))
-          }
-          type="password"
-          placeholder="Password"
-        />
-        <button style={styles.submit} disabled={isInvalid} type="submit">
-          Sign In
-        </button>
-
-        {error && <p>{error.message}</p>}
-      </form>
-    );
-  }
-}
-
-class SignInPage extends Component {
-  render() {
-    return (
       <div>
         <div style={styles.continer}>
           <h1>SignIn</h1>
-          <SignInForm />
+          <form onSubmit={this.onSubmit}>
+            <input
+              style={styles.input}
+              value={email}
+              onChange={event =>
+                this.setState(updateByPropertyName("email", event.target.value))
+              }
+              type="text"
+              placeholder="Email Address"
+            />
+            <input
+              style={styles.input}
+              value={password}
+              onChange={event =>
+                this.setState(
+                  updateByPropertyName("password", event.target.value)
+                )
+              }
+              type="password"
+              placeholder="Password"
+            />
+            <button style={styles.submit} disabled={isInvalid} type="submit">
+              Sign In
+            </button>
+
+            {error && <p>{error.message}</p>}
+          </form>
+          <div>
+            <p> No account? </p>
+            <button
+              style={styles.submit}
+              onClick={() => this.changeState("signUp")}
+            >
+              Create account
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 }
 
-export default SignInPage;
+export default SignIn;
