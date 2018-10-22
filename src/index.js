@@ -1,9 +1,7 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
-import styles from "./styles.css";
-import _ from "lodash";
 import { BehaviorSubject } from "rxjs";
 import { withAuthenticator } from "./withAuthenticator";
+
 let authenticationState = new BehaviorSubject(null);
 
 const isClassComponent = component => {
@@ -218,7 +216,7 @@ const Authenticator = comp => {
         null,
         costumUi
       );
-      return <SecureComponent authState={authState} />;
+      return <SecureComponent {...this.props} authState={authState} />;
     }
   };
 };
