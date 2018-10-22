@@ -5,6 +5,7 @@ import amplifyCustomUi from "aws-amplify-react-custom-ui";
 
 class HelloWorld extends Component {
   render() {
+    console.log(this.props);
     return <div> hello world </div>;
   }
 }
@@ -15,6 +16,6 @@ export default class App extends Component {
 
   render() {
     const SecureHelloWrold = amplifyCustomUi.withAuthenticator(HelloWorld);
-    return <SecureHelloWrold />;
+    return <SecureHelloWrold hello="helloman" />;
   }
 }
