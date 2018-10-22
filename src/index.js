@@ -187,14 +187,13 @@ const updateAuthState = state => {
 };
 
 const Authenticator = comp => {
-  generateCustomUi();
-
   return class extends Component {
     state = {
       authState: null
     };
     authenticationSubscription = null;
     componentDidMount() {
+      generateCustomUi();
       this.authenticationSubscription = authenticationState.subscribe(
         authState => {
           this.setState({ authState });

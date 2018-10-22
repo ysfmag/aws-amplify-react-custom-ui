@@ -16,6 +16,10 @@ export default class App extends Component {
 
   render() {
     const SecureHelloWrold = amplifyCustomUi.withAuthenticator(HelloWorld);
-    return <SecureHelloWrold hello="helloman" />;
+    const d = {
+      hellp: "shhs",
+      history: "hello"
+    };
+    return <SecureHelloWrold {...d} />;
   }
 }
