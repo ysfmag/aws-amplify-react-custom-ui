@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { withAuthenticator } from "./withAuthenticator";
 
 const isClassComponent = component => {
   return typeof component === "function" &&
@@ -171,32 +170,14 @@ const setComponent = (componentType, component) => {
 };
 
 const generateCustomUi = () => {
-  costumUi = [];
+  const costumUiLocal = [];
   configCustomUi.map(Item => {
-    costumUi.push(
+    costumUiLocal.push(
       <HocAuthComponent content={Item.component} type={Item.type} />
     );
   });
-};
-
-const Authenticator = comp => {
-  return class extends Component {
-    componentDidMount() {
-      generateCustomUi();
-    }
-
-    authStateChange = (state, data) => {};
-    render() {
-      const SecureComponent = withAuthenticator(
-        AmplifyAuthenticator,
-        this.authStateChange,
-        comp,
-        null,
-        costumUi
-      );
-      return <SecureComponent {...this.props} />;
-    }
-  };
+  console.log("costumUiLocal", costumUiLocal);
+  return costumUiLocal;
 };
 
 const setSignIn = component => {
@@ -231,8 +212,61 @@ const setTOTPSetup = component => {
   setComponent("TOTPSetup", component);
 };
 
+const withAuthenticator = (
+  Comp,
+  includeGreetings = false,
+  federated = null,
+  theme = null
+) => {
+  return class extends Component {
+    authenticatorComponents = [];
+    constructor(props) {
+      super(props);
+      this.state = {
+        authState: props.authState || null,
+        authData: props.authData || null
+      };
+    }
+
+    componentDidMount() {
+      this.authenticatorComponents = generateCustomUi();
+    }
+
+    handleAuthStateChange = (state, data) => {
+      this.setState({ authState: state, authData: data });
+    };
+
+    render() {
+      const { authState, authData } = this.state;
+      const signedIn = authState === "signedIn";
+      if (signedIn) {
+        return (
+          <div>
+            <Comp
+              {...this.props}
+              authState={authState}
+              authData={authData}
+              onStateChange={this.handleAuthStateChange}
+            />
+          </div>
+        );
+      }
+      return (
+        <AmplifyAuthenticator
+          {...this.props}
+          theme={theme}
+          federated={federated || this.props.federated}
+          hideDefault={this.authenticatorComponents.length > 0}
+          onStateChange={this.handleAuthStateChange}
+          children={this.authenticatorComponents}
+        />
+      );
+    }
+  };
+};
+
 export default {
-  withAuthenticator: Authenticator,
+  withAuthenticator,
   configure,
   //Component Setter
   setSignIn,
