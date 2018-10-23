@@ -1,8 +1,5 @@
 import React, { Component } from "react";
-import { BehaviorSubject } from "rxjs";
 import { withAuthenticator } from "./withAuthenticator";
-
-let authenticationState = new BehaviorSubject(null);
 
 const isClassComponent = component => {
   return typeof component === "function" &&
@@ -182,32 +179,14 @@ const generateCustomUi = () => {
   });
 };
 
-const updateAuthState = state => {
-  authenticationState.next(state);
-};
-
 const Authenticator = comp => {
   return class extends Component {
-    state = {
-      authState: null
-    };
-    authenticationSubscription = null;
     componentDidMount() {
       generateCustomUi();
-      this.authenticationSubscription = authenticationState.subscribe(
-        authState => {
-          this.setState({ authState });
-        }
-      );
     }
-    componentWillUnmount() {
-      if (this.authenticationSubscription) {
-        this.authenticationSubscription.unsubscribe();
-      }
-    }
+
     authStateChange = (state, data) => {};
     render() {
-      const { authState } = this.state;
       const SecureComponent = withAuthenticator(
         AmplifyAuthenticator,
         this.authStateChange,
@@ -215,7 +194,7 @@ const Authenticator = comp => {
         null,
         costumUi
       );
-      return <SecureComponent {...this.props} authState={authState} />;
+      return <SecureComponent {...this.props} />;
     }
   };
 };
