@@ -14,6 +14,12 @@ npm install --save aws-amplify-react-custom-ui
 
 This lib help you override existing ui for amplify-react
 
+## Online Example
+
+https://stackblitz.com/github/ysfmag/aws-amplify-react-custom-ui-example
+
+github link : https://github.com/ysfmag/aws-amplify-react-custom-ui-example
+
 ## Configuration
 
 Somewhere in your app, preferably at the root level, configure AmplifyCustomUi .
@@ -74,9 +80,9 @@ the lib provide tow function authError , changeAuthState as props to the compone
 
 ```jsx
 import React, { Component } from "react";
-
 import SignIn from "./SignIn";
 import amplifyCustomUi from "aws-amplify-react-custom-ui";
+import SecureApp from "./SecureApp";
 
 class App extends Component {
   componentWillMount() {
@@ -84,10 +90,49 @@ class App extends Component {
   }
 
   render() {
-    return <div> hello world </div>;
+    return <SecureApp />;
   }
 }
-export default amplifyCustomUi.withAuthenticator(HelloWorld);
+
+export default App;
+```
+
+## SecureApp
+
+```jsx
+import React, { Component } from "react";
+import amplifyCustomUi from "aws-amplify-react-custom-ui";
+import { Auth } from "aws-amplify";
+
+const styes = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  button: { width: "200px", height: "60px", backgroundColor: "red" }
+};
+class SecureApp extends Component {
+  signOut = () => {
+    const { onStateChange } = this.props;
+    Auth.signOut().then(() => {
+      onStateChange("signIn");
+    });
+  };
+  render() {
+    return (
+      <div style={styes.container}>
+        <h1> hello world </h1>
+        <button onClick={this.signOut} style={styes.button}>
+          sign Out
+        </button>
+      </div>
+    );
+  }
+}
+
+export default amplifyCustomUi.withAuthenticator(SecureApp);
 ```
 
 ## SignIn
