@@ -48,7 +48,7 @@ AmplifyCustomUi.setSignIn(SignIn);
 
 **params**
 
-> withAuthenticator() : component renders your App component after a successful user signed in, and it prevents non-sign-in uses to interact with your app. In this case, we need to display a sign-out button to trigger the related process.
+> withAuthenticator(Component, federated = null, theme = null) : component renders your App component after a successful user signed in, and it prevents non-sign-in uses to interact with your app. In this case, we need to display a sign-out button to trigger the related process.
 
 > configure(configuration) : configure the lib "aws-amplify-react-custom-ui" .
 
@@ -78,21 +78,16 @@ import React, { Component } from "react";
 import SignIn from "./SignIn";
 import amplifyCustomUi from "aws-amplify-react-custom-ui";
 
-class HelloWorld extends Component {
-  render() {
-    return <div> hello world </div>;
-  }
-}
-export default class App extends Component {
+class App extends Component {
   componentWillMount() {
     amplifyCustomUi.setSignIn(SignIn);
   }
 
   render() {
-    const SecureHelloWrold = amplifyCustomUi.withAuthenticator(HelloWorld);
-    return <SecureHelloWrold />;
+    return <div> hello world </div>;
   }
 }
+export default amplifyCustomUi.withAuthenticator(HelloWorld);
 ```
 
 ## SignIn
