@@ -1,12 +1,5 @@
 import React, { Component } from "react";
 
-const isClassComponent = component => {
-  return typeof component === "function" &&
-    !!component.prototype.isReactComponent
-    ? true
-    : false;
-};
-
 const isFunctionComponent = component => {
   return typeof component === "function" &&
     String(component).includes("return React.createElement")
@@ -73,13 +66,9 @@ class DisplayComponentArg extends Component {
 const HocAuthComponent = (() => {
   return class extends Component {
     render() {
-      const props = this.props;
       const {
         authState,
-        content,
-        onStateChange,
-        type,
-        onAuthEvent
+        type
       } = this.props;
 
       if (authState && authState.includes(type)) {
@@ -90,15 +79,15 @@ const HocAuthComponent = (() => {
   };
 })();
 
-let Greetings = () => <div>please provied : Greetings</div>,
+let Greetings = () => <div>please provide : Greetings</div>,
   SignIn = () => <div>please provied : SignIn</div>,
-  ConfirmSignIn = () => <div>please provied : ConfirmSignIn</div>,
-  RequireNewPassword = () => <div>please provied : RequireNewPassword</div>,
-  SignUp = () => <div> please provied : SignUp</div>,
-  ConfirmSignUp = () => <div> please provied : ConfirmSignUp</div>,
-  VerifyContact = () => <div>please provied : VerifyContact</div>,
-  ForgotPassword = () => <div>please provied : ForgotPassword</div>,
-  TOTPSetup = () => <div>please provied : TOTPSetup</div>;
+  ConfirmSignIn = () => <div>please provide : ConfirmSignIn</div>,
+  RequireNewPassword = () => <div>please provide : RequireNewPassword</div>,
+  SignUp = () => <div> please provide : SignUp</div>,
+  ConfirmSignUp = () => <div> please provide : ConfirmSignUp</div>,
+  VerifyContact = () => <div>please provide : VerifyContact</div>,
+  ForgotPassword = () => <div>please provide : ForgotPassword</div>,
+  TOTPSetup = () => <div>please provide : TOTPSetup</div>;
 
 let AmplifyAuthenticator = null;
 const configure = aws_amplify_react => {
@@ -113,8 +102,6 @@ const configure = aws_amplify_react => {
   setRequireNewPassword(aws_amplify_react.RequireNewPassword);
   setConfirmSignIn(aws_amplify_react.ConfirmSignIn);
 };
-
-let costumUi = [];
 
 const configCustomUi = [
   {
