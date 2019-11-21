@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Auth } from "aws-amplify";
 const styles = {
-  continer: {
+  container: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -91,7 +91,7 @@ class SignIn extends Component {
 
     return (
       <div>
-        <div style={styles.continer}>
+        <div style={styles.container}>
           <h1>SignIn</h1>
           <form onSubmit={this.onSubmit}>
             <input
