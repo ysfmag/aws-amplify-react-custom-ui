@@ -163,7 +163,6 @@ const generateCustomUi = () => {
       <HocAuthComponent content={Item.component} type={Item.type} />
     );
   });
-  console.log("costumUiLocal", costumUiLocal);
   return costumUiLocal;
 };
 
